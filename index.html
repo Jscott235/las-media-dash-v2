@@ -134,39 +134,9 @@ select option{background:#0f0f28;}
       <div class="section-sub">Dashboard overview</div>
     </div>
 
-    <div class="section" id="sec-leads">
-      <div class="section-title">Leads</div>
-      <div class="section-sub">Pipeline · Scanner · Call list</div>
-    </div>
-
-    <div class="section" id="sec-clients">
-      <div class="section-title">Clients</div>
-      <div class="section-sub">Active retainer clients</div>
-    </div>
-
-    <div class="section" id="sec-calendar">
-      <div class="section-title">Calendar</div>
-      <div class="section-sub">Shoots · Posts · Meetings</div>
-    </div>
-
-    <div class="section" id="sec-business">
-      <div class="section-title">Business</div>
-      <div class="section-sub">Income · Goals</div>
-    </div>
-
-    <div class="section" id="sec-packages">
-      <div class="section-title">Package Builder</div>
-      <div class="section-sub">Quotes · Add-ons · Proposals</div>
-    </div>
-
-    <div class="section" id="sec-scripts">
-      <div class="section-title">Scripts</div>
-      <div class="section-sub">Call scripts · Objections · WhatsApp</div>
-    </div>
-
-    <div class="section" id="sec-contracts">
-      <div class="section-title">Contracts</div>
-      <div class="section-sub">Draft · Send · Sign</div>
+    <div class="section" id="sec-outreach">
+      <div class="section-title">Outreach</div>
+      <div class="section-sub"></div>
     </div>
 
   </main>
@@ -180,7 +150,8 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // ── NAV ──
 const NAV = [
-  { id: 'home', label: 'Home', icon: '⌂' },
+  { id: 'home',     label: 'Home',     icon: '⌂' },
+  { id: 'outreach', label: 'Outreach', icon: '📞' },
 ];
 
 let activeSection = null;
