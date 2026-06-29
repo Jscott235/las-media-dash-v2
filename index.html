@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LAS Media OS</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -32,9 +32,19 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 select,input,textarea{font-family:'Inter',sans-serif;color:var(--text);}
 select option{background:#0f0f28;}
 
+/* ── AMBIENT BACKGROUND ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 60%, rgba(99,102,241,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(139,92,246,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 30% 30% at 60% 80%, rgba(34,211,238,0.04) 0%, transparent 70%);
+}
+#app,#loginScreen,.sidebar,.main{position:relative;z-index:1;}
+
 /* ── LOGIN ── */
 #loginScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;}
-.login-box{width:100%;max-width:360px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:20px;padding:2.5rem;backdrop-filter:blur(40px);}
+.login-box{width:100%;max-width:360px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:2.5rem;backdrop-filter:blur(40px);box-shadow:0 40px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.05) inset,0 0 60px rgba(99,102,241,0.08);}
 .login-logo{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:1.75rem;display:flex;align-items:center;gap:.6rem;}
 .login-logo span{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;}
 .login-field{margin-bottom:1rem;}
@@ -48,29 +58,30 @@ select option{background:#0f0f28;}
 /* ── APP LAYOUT ── */
 #app{display:none;height:100vh;flex-direction:row;}
 #app.visible{display:flex;}
-.sidebar{width:var(--sw);flex-shrink:0;background:#0d0d24;border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+.sidebar{width:var(--sw);flex-shrink:0;background:#0b0b22;border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
 .main{flex:1;overflow-y:auto;height:100vh;}
 
 /* ── SIDEBAR ── */
-.sb-head{padding:1.25rem 1.1rem 1rem;border-bottom:1px solid var(--border);}
-.sb-brand{font-family:'Space Grotesk',sans-serif;font-size:.95rem;font-weight:700;color:var(--text);}
-.sb-sub{font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:.15rem;}
-.sb-nav{padding:.5rem .65rem;flex:1;}
-.nav-item{display:flex;align-items:center;gap:.65rem;padding:.6rem .75rem;border-radius:var(--rs);cursor:pointer;transition:all .15s;margin-bottom:.15rem;}
-.nav-item:hover{background:var(--surface-h);}
-.nav-item.active{background:rgba(99,102,241,0.12);}
+.sb-head{padding:1.5rem 1.25rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;}
+.sb-mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.85rem;color:#fff;box-shadow:0 4px 12px rgba(99,102,241,0.35);flex-shrink:0;}
+.sb-brand{font-family:'Space Grotesk',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:-.01em;color:var(--text);}
+.sb-sub{font-size:.58rem;font-weight:500;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-top:.1rem;}
+.sb-nav{padding:.35rem .75rem;flex:1;}
+.nav-item{display:flex;align-items:center;gap:.75rem;padding:.65rem .75rem;border-radius:var(--rs);cursor:pointer;transition:all .18s var(--ease);margin-bottom:.1rem;border:1px solid transparent;}
+.nav-item:hover{background:var(--surface-h);border-color:var(--border);}
+.nav-item.active{background:rgba(99,102,241,0.12);border-color:rgba(99,102,241,0.25);}
 .nav-item.active .nav-icon{color:var(--accent);}
 .nav-icon{font-size:.85rem;width:18px;text-align:center;color:var(--dim);flex-shrink:0;}
 .nav-label{font-size:.78rem;font-weight:500;color:var(--muted);}
 .nav-item.active .nav-label{color:var(--text);}
-.sb-footer{padding:1rem 1.1rem;border-top:1px solid var(--border);}
+.sb-footer{padding:1rem 1.25rem;border-top:1px solid var(--border);}
 .signout{font-size:.7rem;color:var(--dim);cursor:pointer;transition:color .15s;}
 .signout:hover{color:var(--red);}
 
 /* ── SECTION ── */
 .section{display:none;padding:2rem;min-height:100%;}
 .section.active{display:block;}
-.section-title{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;letter-spacing:-.02em;}
+.section-title{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:-.02em;color:var(--text);}
 
 /* ── SECTION BLOCKS ── */
 .sec-block{margin-top:1.75rem;}
@@ -100,9 +111,9 @@ textarea.input{resize:vertical;min-height:80px;}
 select.input{cursor:pointer;background:#0d0d24;}
 
 /* ── MODAL ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center;padding:1rem;}
 .modal-overlay.open{display:flex;}
-.modal{background:#0f0f28;border:1px solid var(--border);border-radius:var(--r);padding:1.75rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;}
+.modal{background:#0f0f28;border:1px solid rgba(255,255,255,0.1);border-radius:var(--r);padding:1.75rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 40px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.05) inset;}
 .modal-title{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:1.25rem;}
 .modal-actions{display:flex;gap:.6rem;margin-top:1.25rem;}
 
@@ -118,8 +129,8 @@ select.input{cursor:pointer;background:#0d0d24;}
 
 /* ── LEAD CARDS ── */
 .leads-list{display:flex;flex-direction:column;gap:.6rem;}
-.lead-card{background:#0d0d24;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .15s;}
-.lead-card:hover{border-color:var(--border-h);}
+.lead-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;backdrop-filter:blur(12px);transition:border-color .2s var(--ease),box-shadow .2s var(--ease);}
+.lead-card:hover{border-color:rgba(99,102,241,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.2);}
 .lead-card.open{border-color:rgba(99,102,241,0.3);}
 .lead-card-head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.1rem;cursor:pointer;user-select:none;}
 .lead-card-left{}
@@ -334,8 +345,11 @@ select.input{cursor:pointer;background:#0d0d24;}
 
   <aside class="sidebar" id="sidebar">
     <div class="sb-head">
-      <div class="sb-brand">LAS Media</div>
-      <div class="sb-sub">Business OS</div>
+      <div class="sb-mark">L</div>
+      <div>
+        <div class="sb-brand">LAS Media</div>
+        <div class="sb-sub">Business OS</div>
+      </div>
     </div>
     <nav class="sb-nav" id="sbNav"></nav>
     <div class="sb-footer">
