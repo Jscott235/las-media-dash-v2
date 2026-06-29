@@ -73,7 +73,10 @@ select option{background:#0f0f28;}
 .section-title{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;letter-spacing:-.02em;color:var(--text);}
 .section-sub{font-size:.75rem;color:var(--muted);margin-top:.3rem;}
 
-/* ── MOBILE ── */
+/* ── SECTION BLOCKS ── */
+.sec-block{margin-top:2rem;}
+.sec-block-title{font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid var(--border);}
+.sec-block-body{min-height:60px;}
 .mob-bar{display:none;align-items:center;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg);}
 .mob-menu{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:.25rem;}
 .sb-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:98;}
@@ -136,7 +139,16 @@ select option{background:#0f0f28;}
 
     <div class="section" id="sec-outreach">
       <div class="section-title">Outreach</div>
-      <div class="section-sub"></div>
+
+      <div class="sec-block">
+        <div class="sec-block-title">Find Leads</div>
+        <div class="sec-block-body" id="findLeads"></div>
+      </div>
+
+      <div class="sec-block">
+        <div class="sec-block-title">Current Leads</div>
+        <div class="sec-block-body" id="currentLeads"></div>
+      </div>
     </div>
 
   </main>
