@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAS Media OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#07071a;
+  --surface:rgba(255,255,255,0.04);
+  --surface-h:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);
+  --border-h:rgba(255,255,255,0.15);
+  --text:#eeeeff;
+  --muted:rgba(220,220,255,0.5);
+  --dim:rgba(220,220,255,0.22);
+  --accent:#6366f1;
+  --accent2:#8b5cf6;
+  --green:#10b981;
+  --amber:#f59e0b;
+  --red:#ef4444;
+  --cyan:#22d3ee;
+  --r:14px;
+  --rs:8px;
+  --sw:220px;
+  --ease:cubic-bezier(0.4,0,0.2,1);
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+select,input,textarea{font-family:'Inter',sans-serif;color:var(--text);}
+select option{background:#0f0f28;}
+
+/* ── LOGIN ── */
+#loginScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;}
+.login-box{width:100%;max-width:360px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:20px;padding:2.5rem;backdrop-filter:blur(40px);}
+.login-logo{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:1.75rem;display:flex;align-items:center;gap:.6rem;}
+.login-logo span{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;}
+.login-field{margin-bottom:1rem;}
+.login-field label{display:block;font-size:.7rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;letter-spacing:.05em;}
+.login-input{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--rs);padding:.65rem .9rem;color:var(--text);font-size:.85rem;outline:none;transition:border-color .15s;}
+.login-input:focus{border-color:var(--accent);}
+.login-btn{width:100%;margin-top:.5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:var(--rs);padding:.75rem;color:#fff;font-size:.85rem;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.login-btn:hover{opacity:.9;}
+.login-err{font-size:.72rem;color:var(--red);margin-top:.75rem;text-align:center;min-height:1rem;}
+
+/* ── APP LAYOUT ── */
+#app{display:none;height:100vh;display:none;flex-direction:row;}
+#app.visible{display:flex;}
+.sidebar{width:var(--sw);flex-shrink:0;background:rgba(255,255,255,0.025);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+.main{flex:1;overflow-y:auto;height:100vh;}
+
+/* ── SIDEBAR ── */
+.sb-head{padding:1.25rem 1.1rem 1rem;border-bottom:1px solid var(--border);}
+.sb-brand{font-family:'Space Grotesk',sans-serif;font-size:.95rem;font-weight:700;color:var(--text);}
+.sb-sub{font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:.15rem;}
+.sb-nav{padding:.5rem .65rem;flex:1;}
+.nav-item{display:flex;align-items:center;gap:.65rem;padding:.6rem .75rem;border-radius:var(--rs);cursor:pointer;transition:all .15s;margin-bottom:.15rem;}
+.nav-item:hover{background:var(--surface-h);}
+.nav-item.active{background:rgba(99,102,241,0.12);color:var(--text);}
+.nav-item.active .nav-icon{color:var(--accent);}
+.nav-icon{font-size:.85rem;width:18px;text-align:center;color:var(--dim);flex-shrink:0;}
+.nav-label{font-size:.78rem;font-weight:500;color:var(--muted);}
+.nav-item.active .nav-label{color:var(--text);}
+.sb-footer{padding:1rem 1.1rem;border-top:1px solid var(--border);}
+.signout{font-size:.7rem;color:var(--dim);cursor:pointer;transition:color .15s;}
+.signout:hover{color:var(--red);}
+
+/* ── SECTION ── */
+.section{display:none;padding:2rem;min-height:100%;}
+.section.active{display:block;}
+.section-title{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;letter-spacing:-.02em;color:var(--text);}
+.section-sub{font-size:.75rem;color:var(--muted);margin-top:.3rem;}
+
+/* ── MOBILE ── */
+.mob-bar{display:none;align-items:center;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg);}
+.mob-menu{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:.25rem;}
+.sb-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:98;}
+.sb-backdrop.open{display:block;}
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:99;transform:translateX(-100%);transition:transform .22s var(--ease);}
+  .sidebar.open{transform:translateX(0);}
+  .main{width:100%;}
+  .mob-bar{display:flex;}
+  .section{padding:1rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo"><span>L</span> LAS Media OS</div>
+    <div class="login-field"><label>Email</label><input class="login-input" id="loginEmail" type="email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-field"><label>Password</label><input class="login-input" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- SIDEBAR BACKDROP (mobile) -->
+  <div class="sb-backdrop" id="sbBackdrop" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-head">
+      <div class="sb-brand">LAS Media</div>
+      <div class="sb-sub">Business OS</div>
+    </div>
+    <nav class="sb-nav" id="sbNav">
+      <!-- nav items injected by JS -->
+    </nav>
+    <div class="sb-footer">
+      <div class="signout" onclick="doLogout()">Sign out</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main">
+
+    <!-- MOBILE BAR -->
+    <div class="mob-bar">
+      <button class="mob-menu" onclick="openSidebar()">☰</button>
+    </div>
+
+    <!-- SECTIONS — content added as we build -->
+    <div class="section" id="sec-home">
+      <div class="section-title">Home</div>
+      <div class="section-sub">Dashboard overview</div>
+    </div>
+
+    <div class="section" id="sec-leads">
+      <div class="section-title">Leads</div>
+      <div class="section-sub">Pipeline · Scanner · Call list</div>
+    </div>
+
+    <div class="section" id="sec-clients">
+      <div class="section-title">Clients</div>
+      <div class="section-sub">Active retainer clients</div>
+    </div>
+
+    <div class="section" id="sec-calendar">
+      <div class="section-title">Calendar</div>
+      <div class="section-sub">Shoots · Posts · Meetings</div>
+    </div>
+
+    <div class="section" id="sec-business">
+      <div class="section-title">Business</div>
+      <div class="section-sub">Income · Goals</div>
+    </div>
+
+    <div class="section" id="sec-packages">
+      <div class="section-title">Package Builder</div>
+      <div class="section-sub">Quotes · Add-ons · Proposals</div>
+    </div>
+
+    <div class="section" id="sec-scripts">
+      <div class="section-title">Scripts</div>
+      <div class="section-sub">Call scripts · Objections · WhatsApp</div>
+    </div>
+
+    <div class="section" id="sec-contracts">
+      <div class="section-title">Contracts</div>
+      <div class="section-sub">Draft · Send · Sign</div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── SUPABASE ──
+const SUPABASE_URL  = 'https://zwndffsorkqsjykauepp.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3bmRmZnNvcmtxc2p5a2F1ZXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MzY4NDUsImV4cCI6MjA5ODExMjg0NX0.07KfE2A_sxEfGq1oPnEFvTihs0o54ZuTHG7DuMls7g0';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ── NAV ──
+const NAV = [
+  { id: 'home',      label: 'Home',            icon: '⌂' },
+  { id: 'leads',     label: 'Leads',           icon: '◈' },
+  { id: 'clients',   label: 'Clients',         icon: '◉' },
+  { id: 'calendar',  label: 'Calendar',        icon: '▦' },
+  { id: 'business',  label: 'Business',        icon: '◆' },
+  { id: 'packages',  label: 'Package Builder', icon: '⬡' },
+  { id: 'scripts',   label: 'Scripts',         icon: '✎' },
+  { id: 'contracts', label: 'Contracts',       icon: '📄' },
+];
+
+let activeSection = null;
+
+function buildNav() {
+  const nav = document.getElementById('sbNav');
+  nav.innerHTML = NAV.map(n => `
+    <div class="nav-item" id="nav-${n.id}" onclick="showSection('${n.id}')">
+      <span class="nav-icon">${n.icon}</span>
+      <span class="nav-label">${n.label}</span>
+    </div>`).join('');
+}
+
+function showSection(id) {
+  if (activeSection) {
+    document.getElementById('sec-' + activeSection)?.classList.remove('active');
+    document.getElementById('nav-' + activeSection)?.classList.remove('active');
+  }
+  activeSection = id;
+  document.getElementById('sec-' + id)?.classList.add('active');
+  document.getElementById('nav-' + id)?.classList.add('active');
+  closeSidebar();
+}
+
+// ── SIDEBAR (mobile) ──
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('sbBackdrop').classList.add('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sbBackdrop').classList.remove('open'); }
+
+// ── AUTH ──
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  const err   = document.getElementById('loginErr');
+  err.textContent = '';
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { err.textContent = error.message; return; }
+  showApp();
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  buildNav();
+  showSection('home');
+}
+
+// ── INIT ──
+window.addEventListener('load', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) { showApp(); }
+});
+</script>
+</body>
+</html>
