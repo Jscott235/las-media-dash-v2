@@ -169,8 +169,22 @@ select.input{cursor:pointer;background:#0d0d24;}
 .call-log-outcome{font-size:.72rem;font-weight:600;color:var(--muted);}
 .call-log-notes{font-size:.72rem;color:var(--dim);margin-top:.2rem;}
 
-/* ── FOLLOW UP PANEL ── */
-.followup-options{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem;}
+/* ── FOLLOW UP CARDS ── */
+.fu-scheduled{font-size:.75rem;color:var(--amber);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:var(--rs);padding:.6rem .9rem;margin-bottom:1rem;}
+.fu-cards{display:flex;flex-direction:column;gap:.5rem;}
+.fu-card{display:flex;align-items:center;gap:.9rem;padding:.85rem 1rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;transition:all .15s;}
+.fu-card:hover{background:rgba(255,255,255,0.06);border-color:var(--border-h);transform:translateX(3px);}
+.fu-card-green{border-left:3px solid var(--green);}
+.fu-card-green:hover{background:rgba(16,185,129,0.06);}
+.fu-card-amber{border-left:3px solid var(--amber);}
+.fu-card-amber:hover{background:rgba(245,158,11,0.06);}
+.fu-card-red{border-left:3px solid var(--red);}
+.fu-card-red:hover{background:rgba(239,68,68,0.06);}
+.fu-card-icon{font-size:1.1rem;width:32px;text-align:center;flex-shrink:0;}
+.fu-card-content{flex:1;}
+.fu-card-title{font-size:.82rem;font-weight:600;color:var(--text);}
+.fu-card-desc{font-size:.68rem;color:var(--muted);margin-top:.15rem;}
+.fu-card-arrow{color:var(--dim);font-size:1rem;flex-shrink:0;}
 
 /* ── CALL OVERLAY ── */
 #callOverlay{display:none;position:fixed;inset:0;background:#07071a;z-index:500;flex-direction:column;}
@@ -201,7 +215,6 @@ select.input{cursor:pointer;background:#0d0d24;}
   .mob-bar{display:flex;}
   .section{padding:1rem;}
   .input-row{grid-template-columns:1fr;}
-  .followup-options{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -254,6 +267,19 @@ select.input{cursor:pointer;background:#0d0d24;}
     <div id="fuModalBody"></div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal('followUpModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- PITCH PROMPT MODAL -->
+<div class="modal-overlay" id="pitchPromptModal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-title">✦ Generated Pitch Prompt</div>
+    <p style="font-size:.72rem;color:var(--muted);margin-bottom:.85rem;">Copy this and paste it into ChatGPT or Claude. Then paste the response back into the pitch box and save it.</p>
+    <textarea class="input" id="pitchPromptText" style="min-height:280px;font-size:.75rem;line-height:1.6;" readonly></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="copyPitchPrompt()">Copy Prompt</button>
+      <button class="btn" onclick="closeModal('pitchPromptModal')">Close</button>
     </div>
   </div>
 </div>
@@ -559,14 +585,49 @@ function leadCardHTML(l) {
 
       <!-- FOLLOW UP -->
       <div class="pipeline-panel" id="panel-${l.id}-followup">
-        ${l.followUpDate ? `<div style="font-size:.78rem;color:var(--amber);margin-bottom:.85rem;">⏰ Scheduled: ${new Date(l.followUpDate).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</div>` : ''}
-        ${l.shootDate ? `<div style="font-size:.78rem;color:var(--green);margin-bottom:.85rem;">📅 Shoot: ${new Date(l.shootDate).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}</div>` : ''}
-        <div class="followup-options">
-          <button class="btn btn-green" onclick="openBookShoot('${l.id}')">📅 Book Shoot</button>
-          <button class="btn btn-amber" onclick="openFollowUp('${l.id}','whatsapp')">💬 WhatsApp Follow Up</button>
-          <button class="btn" onclick="openFollowUp('${l.id}','callback')">📞 Schedule Callback</button>
-          <button class="btn btn-red" onclick="moveLead('${l.id}','lost')">✕ Mark as Lost</button>
-          <button class="btn" onclick="openFollowUp('${l.id}','try_later')">🕐 Try Again in a Few Months</button>
+        ${l.followUpDate ? `<div class="fu-scheduled">⏰ Follow up scheduled: <strong>${new Date(l.followUpDate).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}</strong></div>` : ''}
+        ${l.shootDate ? `<div class="fu-scheduled" style="color:var(--green);border-color:rgba(16,185,129,0.2);background:rgba(16,185,129,0.06);">📅 Shoot booked: <strong>${new Date(l.shootDate).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}</strong></div>` : ''}
+        <div class="fu-cards">
+          <div class="fu-card fu-card-green" onclick="openBookShoot('${l.id}')">
+            <div class="fu-card-icon">📅</div>
+            <div class="fu-card-content">
+              <div class="fu-card-title">Book a Shoot</div>
+              <div class="fu-card-desc">They said yes — lock in a date and time</div>
+            </div>
+            <div class="fu-card-arrow">›</div>
+          </div>
+          <div class="fu-card fu-card-amber" onclick="openFollowUp('${l.id}','whatsapp')">
+            <div class="fu-card-icon">💬</div>
+            <div class="fu-card-content">
+              <div class="fu-card-title">WhatsApp Follow Up</div>
+              <div class="fu-card-desc">Send a message to keep them warm</div>
+            </div>
+            <div class="fu-card-arrow">›</div>
+          </div>
+          <div class="fu-card" onclick="openFollowUp('${l.id}','callback')">
+            <div class="fu-card-icon">📞</div>
+            <div class="fu-card-content">
+              <div class="fu-card-title">Schedule a Callback</div>
+              <div class="fu-card-desc">Book a specific time to call them back</div>
+            </div>
+            <div class="fu-card-arrow">›</div>
+          </div>
+          <div class="fu-card" onclick="openFollowUp('${l.id}','try_later')">
+            <div class="fu-card-icon">🕐</div>
+            <div class="fu-card-content">
+              <div class="fu-card-title">Try Again Later</div>
+              <div class="fu-card-desc">Not right now — re-book for a few months time</div>
+            </div>
+            <div class="fu-card-arrow">›</div>
+          </div>
+          <div class="fu-card fu-card-red" onclick="moveLead('${l.id}','lost')">
+            <div class="fu-card-icon">✕</div>
+            <div class="fu-card-content">
+              <div class="fu-card-title">Mark as Lost</div>
+              <div class="fu-card-desc">Not interested — remove from active pipeline</div>
+            </div>
+            <div class="fu-card-arrow">›</div>
+          </div>
         </div>
       </div>
 
@@ -654,7 +715,6 @@ Business Details:
 - Name: ${lead.name}
 - Type: ${lead.type || 'not specified'}
 - Location: ${lead.location || 'not specified'}
-- Phone: ${lead.phone || 'not specified'}
 
 Social Media:
 ${ratings || 'No social media info gathered yet'}
@@ -662,20 +722,23 @@ ${ratings || 'No social media info gathered yet'}
 Notes: ${lead.notes || 'none'}
 
 The pitch should:
-1. Open with Lewis introducing himself
-2. Mention he's noticed their social media specifically
-3. Explain the opportunity (more customers, better content)
-4. Be confident but not salesy
-5. End with an open question
+1. Open with Lewis introducing himself as a local videographer
+2. Reference their social media specifically (mention what he noticed)
+3. Explain the opportunity (more customers, better short-form content)
+4. Be confident but not pushy
+5. End with an open question to keep them talking
 
-Write just the pitch script. No explanations.`;
+Write just the pitch script, no explanations or labels.`;
 
-  // Copy to clipboard
-  navigator.clipboard?.writeText(prompt).then(() => {
+  // Show in modal
+  openModal('pitchPromptModal');
+  document.getElementById('pitchPromptText').value = prompt;
+}
+
+function copyPitchPrompt() {
+  const text = document.getElementById('pitchPromptText')?.value || '';
+  navigator.clipboard?.writeText(text).then(() => {
     showToast('Prompt copied — paste into ChatGPT or Claude');
-  }).catch(() => {
-    // Fallback: show in a modal-style alert
-    window.prompt('Copy this prompt and paste into ChatGPT:', prompt);
   });
 }
 
@@ -747,7 +810,7 @@ function callOutcome(outcome) {
   });
 
   if (outcome === 'shoot') {
-    updateLead(_callLeadId, { callLogs: logs, stage: 'follow_up' });
+    updateLead(_callLeadId, { callLogs: logs, stage: 'shoot_booked' });
     closeCallOverlay();
     renderLeads();
     openBookShoot(_callLeadId);
